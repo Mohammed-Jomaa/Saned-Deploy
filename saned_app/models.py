@@ -1,21 +1,75 @@
 from django.db import models
+import re, bcrypt
+from datetime import date
+
+class UserManager(models.Manager):
+    def user_validator(self, postdata):
+        errors = {}
+        EMAIL_REGEX = re.compile(r'^[a-zA-Z0-9.+_-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]+$')
+
+        first_name = postdata.get('registerFirstName', '').strip()
+        last_name = postdata.get('registerLastName', '').strip()
+        email = postdata.get('registerEmail', '').strip()
+        password = postdata.get('registerPassword', '')
+        repeat_password = postdata.get('registerRepeatPassword', '')
+        region = postdata.get('registerRegion', '').strip()
+
+        if len(first_name) < 2 or not first_name.isalpha():
+            errors['registerFirstName'] = "الاسم الأول يجب أن لا يقل عن حرفين ويحتوي فقط على أحرف"
+
+        if len(last_name) < 2 or not last_name.isalpha():
+            errors['registerLastName'] = "الاسم الأخير يجب أن لا يقل عن حرفين ويحتوي فقط على أحرف"
+
+        if not EMAIL_REGEX.match(email):
+            errors['registerEmail'] = "البريد الإلكتروني غير صالح"
+        elif User.objects.filter(email=email).exists():
+            errors['registerEmail'] = "البريد الإلكتروني مسجل مسبقًا"
+
+        if len(password) < 8:
+            errors['registerPassword'] = "كلمة المرور يجب أن لا تقل عن 8 أحرف"
+
+        if repeat_password != password:
+            errors['registerRepeatPassword'] = "كلمتا المرور غير متطابقتين"
+
+        if not region:
+            errors['registerRegion'] = "يرجى إدخال المنطقة"
+
+        return errors
+
+    def login_validator(self, postdata):
+        errors = {}
+        email = postdata.get('loginEmail', '').strip()
+        password = postdata.get('loginPassword', '')
+
+        if not email or not password:
+            errors['login'] = "البريد الإلكتروني وكلمة المرور مطلوبة"
+            return errors
+
+        user = User.objects.filter(email=email).first()
+        if not user or not bcrypt.checkpw(password.encode(), user.password.encode()):
+            errors['login'] = "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+        return errors
 
 class User(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=100, unique=True)
+    password = models.CharField(max_length=255)
+    region = models.CharField(max_length=45)
     role = models.CharField(max_length=45, choices=[
         ('beneficiary', 'Beneficiary'),
         ('donor', 'Donor'),
         ('ngo', 'NGO'),
         ('admin', 'Admin')
     ])
-    region = models.CharField(max_length=45)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    objects = UserManager()
+
     def __str__(self):
         return f"{self.first_name} {self.last_name} - {self.role}"
+
 
 class NGOProfile(models.Model):
     organization_name = models.CharField(max_length=100)
