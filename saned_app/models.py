@@ -55,7 +55,7 @@ class User(models.Model):
     last_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=100, unique=True)
     password = models.CharField(max_length=255)
-    region = models.CharField(max_length=45)
+    region = models.CharField(max_length=255)
     role = models.CharField(max_length=45, choices=[
         ('beneficiary', 'Beneficiary'),
         ('donor', 'Donor'),

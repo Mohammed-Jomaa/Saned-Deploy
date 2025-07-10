@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="{% static 'CSS/style.css' %}" />
-
   <style>
     body {
       background: linear-gradient(to bottom right, #ffffff, #A8D5C3);
@@ -115,23 +114,24 @@
         </div>
         <div class="text-danger small" id="error-registerEmail"></div>
 
-        <div class="input-group">
+        <div class="input-group mb-2" id="single-region-group">
           <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
-          <select name="registerRegion" class="form-control" required>
-                        <option value="" disabled selected>اختر المدينة</option>
-                        <option value="القدس">القدس</option>
-                        <option value="رام الله">رام الله</option>
-                        <option value="البيرة">البيرة</option>
-                        <option value="نابلس">نابلس</option>
-                        <option value="الخليل">الخليل</option>
-                        <option value="بيت لحم">بيت لحم</option>
-                        <option value="قلقيلية">قلقيلية</option>
-                        <option value="طولكرم">طولكرم</option>
-                        <option value="جنين">جنين</option>
-                        <option value="سلفيت">سلفيت</option>
-                        <option value="أريحا">أريحا</option>
-                        <option value="طوباس">طوباس</option>
-                    </select>
+          <select name="registerRegion" id="single-region-select" class="form-control">
+            <option value="" disabled selected>اختر المدينة</option>
+            {% for city in cities %}
+              <option value="{{ city }}">{{ city }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div id="region-checkboxes" class="mb-2" style="display: none;">
+          <label class="form-label">اختر المدن التي تعمل بها الجمعية:</label>
+          {% for city in cities %}
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="checkbox" name="regions" value="{{ city }}" id="city-{{ forloop.counter }}">
+              <label class="form-check-label" for="city-{{ forloop.counter }}">{{ city }}</label>
+            </div>
+          {% endfor %}
         </div>
         <div class="text-danger small" id="error-registerRegion"></div>
 
@@ -173,17 +173,37 @@
   </div>
 
   <script>
-    function toggleNGODocument() {
-      const role = document.getElementById("role").value;
-      document.getElementById("ngo-document-group").style.display = role === "ngo" ? "flex" : "none";
-    }
+      function toggleNGODocument() {
+    const role = document.getElementById("role").value;
+
+    document.getElementById("ngo-document-group").style.display = role === "ngo" ? "flex" : "none";
+    document.getElementById("single-region-group").style.display = role === "ngo" ? "none" : "flex";
+    document.getElementById("region-checkboxes").style.display = role === "ngo" ? "block" : "none";
+  }
 
     document.getElementById("register-form").onsubmit = async function (e) {
       e.preventDefault();
-      const formData = new FormData(this);
+      const form = e.target;
+      const formData = new FormData(form);
+      const role = document.getElementById("role").value;
 
-      document.querySelectorAll(".text-danger.small").forEach(el => el.innerHTML = "");
-      document.getElementById("register-success").classList.add("d-none");
+      formData.delete("registerRegion");
+
+      if (role === "ngo") {
+        const selectedCities = [...form.querySelectorAll('input[name="regions"]:checked')].map(cb => cb.value);
+        if (selectedCities.length === 0) {
+          document.getElementById("error-registerRegion").innerHTML = "يرجى اختيار مدينة واحدة على الأقل.";
+          return;
+        }
+        formData.append("registerRegion", selectedCities.join(","));
+      } else {
+        const selected = document.getElementById("single-region-select").value;
+        if (!selected) {
+          document.getElementById("error-registerRegion").innerHTML = "يرجى اختيار المدينة.";
+          return;
+        }
+        formData.append("registerRegion", selected);
+      }
 
       const response = await fetch("{% url 'create_user' %}", {
         method: "POST",
@@ -194,20 +214,18 @@
       });
 
       const res = await response.json();
+      document.querySelectorAll(".text-danger.small").forEach(el => el.innerHTML = "");
+      const successBox = document.getElementById("register-success");
 
       if (res.success) {
-        this.reset();
-        this.style.display = "none";
-        const box = document.getElementById("register-success");
-        box.innerHTML = `تم إنشاء الحساب بنجاح! <br><a href="{% url 'login' %}" class="btn btn-outline-dark mt-3">تسجيل الدخول الآن</a>`;
-        box.classList.remove("d-none");
+        form.reset();
+        form.style.display = "none";
+        successBox.innerHTML = `تم إنشاء الحساب بنجاح! <br><a href="{% url 'login' %}" class="btn btn-outline-dark mt-3">تسجيل الدخول الآن</a>`;
+        successBox.classList.remove("d-none");
       } else {
-        const errors = res.errors;
-        for (const key in errors) {
+        for (const key in res.errors) {
           const errorDiv = document.getElementById(`error-${key}`);
-          if (errorDiv) {
-            errorDiv.innerHTML = errors[key];
-          }
+          if (errorDiv) errorDiv.innerHTML = res.errors[key];
         }
       }
     };
@@ -215,5 +233,4 @@
 
   <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 </body>
-
 </html>
