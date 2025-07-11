@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import *
 from django.http import JsonResponse,HttpResponseForbidden
 import bcrypt, json
+from django.contrib import messages
 
 
 def index(request):
@@ -158,3 +159,21 @@ def submit_aid_request(request):
 
         return redirect('beneficiary_dashboard')  
     return HttpResponseForbidden("طريقة غير مسموح بها.")
+
+def delete_aid_request(request, request_id):
+    if 'user_id' not in request.session or request.session.get('role') != 'beneficiary':
+        return redirect('login')
+
+    aid_request = AidRequest.objects.filter(id=request_id, beneficiary_id=request.session['user_id']).first()
+
+    if not aid_request:
+        messages.error(request, "الطلب غير موجود أو غير مسموح لك بحذفه.")
+        return redirect('my_requests')
+
+    if aid_request.status != 'pending':
+        messages.error(request, "لا يمكنك حذف طلب تمت مراجعته أو الموافقة عليه.")
+        return redirect('my_requests')
+
+    aid_request.delete()
+    messages.success(request, "تم حذف الطلب بنجاح.")
+    return redirect('my_requests')

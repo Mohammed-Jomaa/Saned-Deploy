@@ -13,4 +13,6 @@ urlpatterns = [
     path('beneficiary/my-requests/', views.my_requests, name='my_requests'),
     path('beneficiary/aid-request/', views.aid_request_form, name='aid_request_form'),
     path('beneficiary/submit-request/', views.submit_aid_request, name='submit_aid_request'),
+    path('beneficiary/delete-request/<int:request_id>/', views.delete_aid_request, name='delete_aid_request'),
+
 ]
