@@ -5,21 +5,34 @@
   <meta charset="UTF-8">
   <title>{% block title %}ساند - Saned{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
   <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
   <link rel="stylesheet" href="{% static 'CSS/style.css' %}">
 </head>
 
+<<<<<<< HEAD
 <body class="d-flex flex-column min-vh-100">
 
   <nav class="navbar navbar-expand-lg navbar-light navbar-custom shadow-sm">
     <div class="container">
       <a class="navbar-brand fw-bold fs-3" href="/">Saned</a>
+=======
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-custom shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">Saned</a>
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
+<<<<<<< HEAD
         <ul class="navbar-nav mb-2 mb-lg-0 gap-2">
           <li class="nav-item"><a class="nav-link" href="/about/">من نحن</a></li>
           <li class="nav-item"><a class="nav-link" href="/campaigns/">الحملات</a></li>
@@ -27,17 +40,42 @@
             <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">تسجيل الخروج</a></li>
           {% else %}
             <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">تسجيل الدخول</a></li>
+=======
+        <ul class="navbar-nav mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">من نحن</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{%url 'campaign_detail' %}">الحملات</a>
+          </li>
+          {% if request.session.user_id %}
+            <li class="nav-item">
+              <a class="nav-link" href="{%url 'logout'%}">تسجيل الخروج</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">تسجيل الدخول</a>
+            </li>
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
           {% endif %}
         </ul>
       </div>
     </div>
   </nav>
 
+<<<<<<< HEAD
   <main class="container flex-grow-1">
     {% block content %}{% endblock %}
   </main>
 
   <footer class="text-center py-3 border-top text-muted mt-auto">
+=======
+  <main class="container py-4">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="text-center py-3 border-top border-light mt-5 text-muted">
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
     <p class="mb-0">&copy; 2025 Saned - جميع الحقوق محفوظة</p>
   </footer>
 

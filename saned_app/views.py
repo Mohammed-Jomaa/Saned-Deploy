@@ -1,10 +1,19 @@
 from django.shortcuts import render, redirect
 from .models import *
+<<<<<<< HEAD
 from django.http import JsonResponse,HttpResponseForbidden
 import bcrypt, json
 from django.contrib import messages
 
 
+=======
+from django.http import JsonResponse
+import bcrypt, json
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse,HttpResponseForbidden
+from django.utils import timezone
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
 def index(request):
     return render(request, 'index.html')
 
@@ -81,24 +90,39 @@ def login_user(request):
         elif user.role == 'donor':
             redirect_url = '/donor/dashboard'
         elif user.role == 'ngo':
+<<<<<<< HEAD
             redirect_url = '/ngo/dashboard'
+=======
+            redirect_url ='/ngo/dashboard'
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
 
         return JsonResponse({'success': True, 'redirect_url': redirect_url})
 
     return JsonResponse({'success': False, 'errors': {'general': 'طلب غير صالح'}})
+<<<<<<< HEAD
 
 def logout_user(request):
     request.session.flush()
     return redirect('/')
+=======
+def logout(request):
+    request.session.flush()
+    return redirect('login')
+   
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
 
 def beneficiary_dashboard(request):
     if 'user_id' not in request.session or request.session.get('role') != 'beneficiary':
         return redirect('login')
+<<<<<<< HEAD
     user_id = request.session.get('user_id')
     recent_requests = AidRequest.objects.filter(beneficiary_id=user_id).order_by('-created_at')[:3]
     return render(request, 'beneficiary/dashboard.html', {
         'recent_requests': recent_requests
     })
+=======
+    return render(request, 'beneficiary/dashboard.html')
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
 
 def my_requests(request):
     if 'user_id' not in request.session:
@@ -159,6 +183,7 @@ def submit_aid_request(request):
 
         return redirect('beneficiary_dashboard')  
     return HttpResponseForbidden("طريقة غير مسموح بها.")
+<<<<<<< HEAD
 
 def delete_aid_request(request, request_id):
     if 'user_id' not in request.session or request.session.get('role') != 'beneficiary':
@@ -177,3 +202,130 @@ def delete_aid_request(request, request_id):
     aid_request.delete()
     messages.success(request, "تم حذف الطلب بنجاح.")
     return redirect('my_requests')
+=======
+def ngo_dashboard(request):
+    if request.method=="POST":
+        organization_name=request.POST.get('organization_name')
+        license_document=request.FILES.get('license_document')
+        if not organization_name:
+            messages.error(request,'اسم المنظمة مطلوب')
+        elif not license_document:
+            messages.error(request,'وثيقة الترخيص مطلوبة')
+        else:
+            user_id = request.session.get('user_id')
+            user=User.objects.get(id=user_id)
+            ngo_profile=NGOProfile.objects.create(
+                user=user,
+                organization_name=organization_name,
+                license_document=license_document,
+                approved=False
+            )
+            messages.success(request, 'بالامكان المتابعة وانشاء حملة او النظرالى طلبات المساعدات والمساهمة فيها') 
+            return redirect('ngo_create')
+    return render(request,'ngo/dashboard.html')
+
+def ngo_create(request):
+   
+    user_id = request.session.get('user_id')
+    if not user_id:
+       
+        messages.error(request, "يجب تسجيل الدخول أولاً.")
+        return redirect('login')
+    try:
+        user=User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, "المستخدم غير موجود.")
+        return redirect('login')
+
+    profile = NGOProfile.objects.filter(user=user).first()
+    if profile is None:
+        messages.error(request, "لا يوجد ملف منظمة مرتبط بهذا المستخدم.")
+        return redirect('ngo_dashboard')
+
+    if profile.approved:
+        
+        return render(request, 'ngo/create.html', {'profile': profile})
+    else:
+       
+        messages.info(request, "طلبك قيد المراجعة من قبل المسؤول.")
+        return redirect('ngo_dashboard')
+
+def create_campaign(request):
+    
+    return render(request, 'ngo/create_campaign.html')
+
+def campaign_detail(request):
+    if request.method == 'POST':
+        user_id = request.session.get('user_id')
+        if not user_id:
+           messages.error(request, "Please log in first.")
+           return redirect('login')
+
+        try:
+          user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+          messages.error(request, "User not found.")
+          return redirect('login')
+    
+        ngo_profile = NGOProfile.objects.filter(user=user, approved=True).first()
+        if not ngo_profile:
+            messages.error(request, "لا يمكنك إنشاء حملة لأن ملفك غير معتمد أو غير موجود.")
+            return redirect('ngo_dashboard')
+
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        goal_amount = request.POST.get('goal_amount')
+        deadline = request.POST.get('deadline')  
+        Campaign.objects.create(
+            title=title,
+            description=description,
+            goal_amount=goal_amount,
+            deadline=deadline,
+            ngo=ngo_profile
+        )
+        messages.success(request, "تم إنشاء الحملة بنجاح.")
+        campaign=Campaign.objects.all()
+        return render(request,'ngo/campaign_detail.html',{'campaign':campaign})
+def donor_dashboard(request):
+    user_id=request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    user=User.objects.filter(id=user_id).first()
+    aid_donations=Donation.objects.filter(donor=user).order_by('-created_at')
+    campaign_donations=CampaignDonation.objects.filter(donor=user).order_by('-created_at')
+
+    campaigns=Campaign.objects.filter(deadline__gte=date.today()).order_by('-deadline')
+
+    context={
+        'aid_donations':aid_donations,
+        'campaign_donations':campaign_donations,
+        'campaigns':campaigns,
+        'user':user
+    }
+    return render(request,'donor/dashboard.html',context)
+
+def donate_to_campaign(request,campaign_id):
+    user_id=request.session.get('user_id')
+    user=User.objects.filter(id=user_id).first()
+    campaign=Campaign.objects.filter(id=campaign_id).first()
+    if not campaign:
+        return redirect('donor_dashboard')
+    if request.method=="POST":
+        amount=request.POST.get('amount')
+        if not amount or int(amount)<0:
+            return render(request,'donor/donate_campaign.html',{
+                'campaign':campaign,
+                'errors':{'amount':'يرجى ادخال مبلغ صالح '}
+            })
+        CampaignDonation.objects.create(
+            amount=int(amount),
+            donor=user,
+            camapign=campaign,
+            created_at=timezone.now()
+        )
+        return redirect('donor_dashboard')
+    return render(request,'donor/donate_campaign.html',{
+                'campaign':campaign,
+                
+            })
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac

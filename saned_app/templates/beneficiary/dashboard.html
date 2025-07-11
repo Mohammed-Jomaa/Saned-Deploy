@@ -2,6 +2,7 @@
 {% block title %}لوحة المحتاج{% endblock %}
 
 {% block content %}
+<<<<<<< HEAD
 <div class="bg-white shadow-sm p-4 rounded-4" style="max-width: 1000px; margin: auto;">
   <h2 class="mb-4" style="color: #004d40;">👋 مرحبًا {{ request.session.name }}</h2>
   <p class="text-muted">في لوحة التحكم هذه، يمكنك متابعة طلبات المساعدة الخاصة بك وتقديم طلبات جديدة.</p>
@@ -44,5 +45,17 @@
   {% else %}
     <p class="text-muted">لا توجد طلبات بعد.</p>
   {% endif %}
+=======
+<div class="bg-white shadow-sm p-4 rounded-4 text-center" style="max-width: 600px; margin: auto;">
+  <h2 class="mb-3" style="color: #004d40;">👋 مرحبًا {{ request.session.name }}</h2>
+  <p class="text-muted">مرحبًا بك في منصة ساند، حيث يمكنك تقديم طلبات المساعدة ومتابعتها بسهولة.</p>
+
+  <hr>
+
+  <div class="d-grid gap-3 mt-4">
+    <a href="{% url 'aid_request_form' %}" class="btn btn-success btn-lg rounded-pill px-4">📥 تقديم طلب جديد</a>
+    <a href="{% url 'my_requests' %}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">📄 عرض كل الطلبات</a>
+  </div>
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
 </div>
 {% endblock %}

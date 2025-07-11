@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+body {
+    font-family: 'Noto Sans Arabic', Arial, sans-serif;
+    direction: rtl; /* Right-to-left for Arabic text */
+    background: linear-gradient(135deg, #e0eafc, #cfdef3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+}
+
+form {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+}
+
+p {
+    font-size: 18px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 10px;
+    display: block;
+}
+
+input[type="text"],
+input[type="file"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border: 2px solid #dfe6e9;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="file"]:focus {
+    border-color: #0984e3;
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: 0 0 8px rgba(9, 132, 227, 0.3);
+}
+
+button[type="submit"] {
+    background-color: #0984e3;
+    color: #ffffff;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #0652dd;
+    transform: translateY(-2px);
+}
+
+button[type="submit"]:focus {
+    outline: none;
+    box-shadow: 0 0 8px rgba(9, 132, 227, 0.5);
+}
+
+button[type="submit"]:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    form {
+        padding: 25px;
+        max-width: 90%;
+    }
+
+    p, label, input, button {
+        font-size: 14px;
+    }
+
+    button[type="submit"] {
+        padding: 12px 15px;
+    }
+}
+    </style>
+</head>
+<body>
+    
+    <form method="POST" enctype="multipart/form-data">
+        
+  {% csrf_token %}
+  <p>اهلا وسهلا عزيزي </p>
+  <label for="organization_name">🏢🏢🏢اسم المنظمة</label><br>
+  <input type="text" name="organization_name" id="organization_name" maxlength="100" required>
+ {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert" style="margin-bottom:15px; font-weight:bold;">
+        {{ message }} 🙏📜🏢
+      </div>
+    {% endfor %}
+  {% endif %}
+  <label for="license_document">وثيقة الترخيص📜📜📜</label><br>
+  <input type="file" name="license_document" id="license_document" required><br><br>
+ {% if messages %}
+    {% for message in messages %}
+      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert" style="margin-bottom:15px; font-weight:bold;">
+        {{ message }} 🙏📜🏢
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <button type="submit">تسجيل</button>
+  
+</form>
+
+</body>
+</html>

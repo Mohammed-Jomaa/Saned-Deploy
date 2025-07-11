@@ -76,7 +76,11 @@ WSGI_APPLICATION = 'saned_project.wsgi.application'
 
 DATABASES = {
     'default': {
+<<<<<<< HEAD
         'ENGINE': 'django.db.backends.mysql',
+=======
+        'ENGINE': 'django.db.backends.sqlite3',
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
         'NAME': 'saned_db',
         'USER': 'root',  
         'PASSWORD': '5781',

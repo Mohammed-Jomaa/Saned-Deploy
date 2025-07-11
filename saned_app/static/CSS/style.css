@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 html, body {
     height: 100%;
     margin: 0;
@@ -12,6 +13,11 @@ main.container {
     flex: 1;
     padding-top: 2rem;
     padding-bottom: 2rem;
+=======
+
+main.container {
+    min-height: calc(100vh - 150px); 
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
 }
 
 .welcome-section {
@@ -20,6 +26,10 @@ main.container {
     justify-content: space-between;
     gap: 60px;
     padding: 60px 10%;
+<<<<<<< HEAD
+=======
+    min-height: 100vh;
+>>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
 }
 
 .welcome-text {
