@@ -5,6 +5,7 @@ import bcrypt, json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse,HttpResponseForbidden
+from django.utils import timezone
 def index(request):
     return render(request, 'index.html')
 
@@ -86,7 +87,10 @@ def login_user(request):
         return JsonResponse({'success': True, 'redirect_url': redirect_url})
 
     return JsonResponse({'success': False, 'errors': {'general': 'طلب غير صالح'}})
-
+def logout(request):
+    request.session.flush()
+    return redirect('login')
+   
 
 def beneficiary_dashboard(request):
     if 'user_id' not in request.session or request.session.get('role') != 'beneficiary':
@@ -225,7 +229,7 @@ def campaign_detail(request):
         description = request.POST.get('description')
         goal_amount = request.POST.get('goal_amount')
         deadline = request.POST.get('deadline')  
-        campaign = Campaign.objects.create(
+        Campaign.objects.create(
             title=title,
             description=description,
             goal_amount=goal_amount,
@@ -235,3 +239,45 @@ def campaign_detail(request):
         messages.success(request, "تم إنشاء الحملة بنجاح.")
         campaign=Campaign.objects.all()
         return render(request,'ngo/campaign_detail.html',{'campaign':campaign})
+def donor_dashboard(request):
+    user_id=request.session.get('user_id')
+    if not user_id:
+        return redirect('login')
+    user=User.objects.filter(id=user_id).first()
+    aid_donations=Donation.objects.filter(donor=user).order_by('-created_at')
+    campaign_donations=CampaignDonation.objects.filter(donor=user).order_by('-created_at')
+
+    campaigns=Campaign.objects.filter(deadline__gte=date.today()).order_by('-deadline')
+
+    context={
+        'aid_donations':aid_donations,
+        'campaign_donations':campaign_donations,
+        'campaigns':campaigns,
+        'user':user
+    }
+    return render(request,'donor/dashboard.html',context)
+
+def donate_to_campaign(request,campaign_id):
+    user_id=request.session.get('user_id')
+    user=User.objects.filter(id=user_id).first()
+    campaign=Campaign.objects.filter(id=campaign_id).first()
+    if not campaign:
+        return redirect('donor_dashboard')
+    if request.method=="POST":
+        amount=request.POST.get('amount')
+        if not amount or int(amount)<0:
+            return render(request,'donor/donate_campaign.html',{
+                'campaign':campaign,
+                'errors':{'amount':'يرجى ادخال مبلغ صالح '}
+            })
+        CampaignDonation.objects.create(
+            amount=int(amount),
+            donor=user,
+            camapign=campaign,
+            created_at=timezone.now()
+        )
+        return redirect('donor_dashboard')
+    return render(request,'donor/donate_campaign.html',{
+                'campaign':campaign,
+                
+            })

@@ -117,3 +117,4 @@ class CampaignDonation(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name="campaign_donations")
     amount = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+

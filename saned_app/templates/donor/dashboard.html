@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    body {
+      background-color: #f8f9fa;
+      padding: 2rem;
+    }
+    .card {
+      max-width: 600px;
+      margin: auto;
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .card-title {
+      font-size: 1.75rem;
+      color: #0d6efd;
+    }
+    .card-text strong {
+      color: #212529;
+    }
+  </style>
+</head>
+<body>
+    <p>الحملات النشطة</p>
+    {%for campaign in campaigns%}
+    <div class="container">
+    <div class="card p-4">
+      <h1 class="card-title mb-4">{{ campaign.title }}</h1>
+      <p class="card-text"><strong>الوصف:</strong> {{ campaign.description }}</p>
+      <p class="card-text"><strong>المبلغ المستهدف:</strong> {{ campaign.goal_amount }} شيكل</p>
+      <p class="card-text"><strong>الموعد النهائي:</strong> {{ campaign.deadline }}</p>
+      <p class="card-text"><strong>الجهة:</strong> {{ campaign.ngo.organization_name }}</p>
+      <a href="{% url 'donate_to_campaign' campaign.id %}">المساهمة في الحملة</a>
+    </div>
+  </div>
+    {%endfor%}
+</body>
+</html>
