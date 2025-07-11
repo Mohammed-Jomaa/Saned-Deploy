@@ -1,141 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-body {
-    font-family: 'Noto Sans Arabic', Arial, sans-serif;
-    direction: rtl; /* Right-to-left for Arabic text */
-    background: linear-gradient(135deg, #e0eafc, #cfdef3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px;
-}
+{% extends 'base.html' %}
+{% block title %}لوحة تحكم الجمعية{% endblock %}
 
-form {
-    background-color: #ffffff;
-    padding: 40px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    width: 100%;
-    max-width: 450px;
-    text-align: center;
-}
+{% block content %}
+<div class="container py-5">
 
-p {
-    font-size: 18px;
-    font-weight: bold;
-    color: #2c3e50;
-    margin-bottom: 20px;
-    text-align: center;
-}
+    <div class="mb-5 text-center">
+        <h2 class="fw-bold text-success">🎯 لوحة تحكم الجمعية</h2>
+        <p class="text-muted fs-6">أهلاً بك في نظام ساند، يمكنك إدارة حملاتك وطلبات منطقتك بكل سهولة</p>
+    </div>
 
-label {
-    font-size: 16px;
-    font-weight: 600;
-    color: #34495e;
-    margin-bottom: 10px;
-    display: block;
-}
+    <div class="card mb-5 shadow-sm border-0 rounded-4">
+        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+            <div>
+                <h5 class="mb-2">📌 <strong>{{ profile.organization_name }}</strong></h5>
+            </div>
+            <div>
+                {% if profile.approved %}
+                <span class="badge bg-success fs-6 px-4 py-2 rounded-pill">تم الاعتماد ✅</span>
+                {% else %}
+                <span class="badge bg-warning text-dark fs-6 px-4 py-2 rounded-pill">قيد المراجعة ⏳</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
-input[type="text"],
-input[type="file"] {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    border: 2px solid #dfe6e9;
-    border-radius: 8px;
-    font-size: 14px;
-    background-color: #f9f9f9;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, background-color 0.3s ease;
-}
+    <div class="row g-4 mb-5">
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <a href="{% url 'create_campaign_form' %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 text-center py-4 h-100">
+                        <div class="fs-2 mb-2 text-success">➕</div>
+                        <h6 class="fw-bold text-dark">إنشاء حملة جديدة</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'region_requests' %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 text-center py-4 h-100">
+                        <div class="fs-2 mb-2 text-primary">📄</div>
+                        <h6 class="fw-bold text-dark">عرض طلبات منطقتي</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'my_campaigns' %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 text-center py-4 h-100">
+                        <div class="fs-2 mb-2 text-secondary">📜</div>
+                        <h6 class="fw-bold text-dark">حملاتي</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'adopted_requests' %}" class="text-decoration-none">
+                    <div class="card border-0 shadow-sm rounded-4 text-center py-4 h-100">
+                        <div class="fs-2 mb-2 text-warning">📦</div>
+                        <h6 class="fw-bold text-dark">الطلبات التي تم تبنيها</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
 
-input[type="text"]:focus,
-input[type="file"]:focus {
-    border-color: #0984e3;
-    background-color: #ffffff;
-    outline: none;
-    box-shadow: 0 0 8px rgba(9, 132, 227, 0.3);
-}
+    </div>
 
-button[type="submit"] {
-    background-color: #0984e3;
-    color: #ffffff;
-    padding: 14px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-button[type="submit"]:hover {
-    background-color: #0652dd;
-    transform: translateY(-2px);
-}
-
-button[type="submit"]:focus {
-    outline: none;
-    box-shadow: 0 0 8px rgba(9, 132, 227, 0.5);
-}
-
-button[type="submit"]:active {
-    transform: translateY(0);
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-    form {
-        padding: 25px;
-        max-width: 90%;
-    }
-
-    p, label, input, button {
-        font-size: 14px;
-    }
-
-    button[type="submit"] {
-        padding: 12px 15px;
-    }
-}
-    </style>
-</head>
-<body>
-    
-    <form method="POST" enctype="multipart/form-data">
-        
-  {% csrf_token %}
-  <p>اهلا وسهلا عزيزي </p>
-  <label for="organization_name">🏢🏢🏢اسم المنظمة</label><br>
-  <input type="text" name="organization_name" id="organization_name" maxlength="100" required>
- {% if messages %}
-    {% for message in messages %}
-      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert" style="margin-bottom:15px; font-weight:bold;">
-        {{ message }} 🙏📜🏢
-      </div>
-    {% endfor %}
-  {% endif %}
-  <label for="license_document">وثيقة الترخيص📜📜📜</label><br>
-  <input type="file" name="license_document" id="license_document" required><br><br>
- {% if messages %}
-    {% for message in messages %}
-      <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert" style="margin-bottom:15px; font-weight:bold;">
-        {{ message }} 🙏📜🏢
-      </div>
-    {% endfor %}
-  {% endif %}
-
-  <button type="submit">تسجيل</button>
-  
-</form>
-
-</body>
-</html>
+</div>
+{% endblock %}

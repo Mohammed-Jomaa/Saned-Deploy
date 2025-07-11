@@ -71,27 +71,33 @@ TEMPLATES = [
 WSGI_APPLICATION = 'saned_project.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/2.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
-<<<<<<< HEAD
         'ENGINE': 'django.db.backends.mysql',
-=======
-        'ENGINE': 'django.db.backends.sqlite3',
->>>>>>> 77353484255c112d192f39374dd0fa6f25bd1eac
         'NAME': 'saned_db',
-        'USER': 'root',  
+        'USER': 'root',
         'PASSWORD': '5781',
         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
 
+
+# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Static files
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Localization
+LANGUAGE_CODE = 'ar'
+TIME_ZONE = 'Asia/Gaza'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
 
 
 # Password validation

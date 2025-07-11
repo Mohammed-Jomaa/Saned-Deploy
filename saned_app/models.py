@@ -91,6 +91,7 @@ class AidRequest(models.Model):
         ('delivered', 'Delivered'),
     ], default='pending')
     beneficiary = models.ForeignKey(User, on_delete=models.CASCADE, related_name="aid_requests")
+    ngo = models.ForeignKey(NGOProfile, on_delete=models.SET_NULL, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
