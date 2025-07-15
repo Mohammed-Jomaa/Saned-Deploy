@@ -17,6 +17,7 @@ urlpatterns = [
     path('beneficiary/submit-request/', views.submit_aid_request, name='submit_aid_request'),
     path('beneficiary/delete-request/<int:request_id>/', views.delete_aid_request, name='delete_aid_request'),
 
+    # NGO
     path('ngo/pending-approval/', views.pending_approval, name='pending_approval'),
     path('ngo/check-approval/', views.check_ngo_approval, name='check_ngo_approval'),
     path('ngo/dashboard/', views.ngo_dashboard, name='ngo_dashboard'),
@@ -27,4 +28,13 @@ urlpatterns = [
     path('ngo/approve-request/<int:request_id>/', views.approve_aid_request, name='approve_aid_request'),
     path('ngo/reject-request/<int:request_id>/', views.reject_aid_request, name='reject_aid_request'),
     path('ngo/adopted-requests/', views.adopted_requests, name='adopted_requests'),
+
+    # DONOR
+    path('donor/dashboard/', views.donor_dashboard, name='donor_dashboard'),
+    path('donor/donate_to_campaign/<int:campaign_id>/', views.donate_to_campaign, name='donate_to_campaign'),
+    path('donor/donate_to_request/<int:request_id>/', views.donate_to_request, name='donate_to_request'),
+
+    path('about/', views.about_us, name='about_us'),
+
+
 ]

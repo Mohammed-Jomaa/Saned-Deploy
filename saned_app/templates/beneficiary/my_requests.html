@@ -33,11 +33,24 @@
                     {% if request.status == 'pending' %}bg-warning text-dark
                     {% elif request.status == 'approved' %}bg-success
                     {% elif request.status == 'rejected' %}bg-danger
-                    {% else %}bg-info{% endif %}">
-                    {{ request.get_status_display }}
+                    {% elif request.status == 'delivered' %}bg-info
+                    {% endif %}">
+                    {% if request.status == 'pending' %}
+                      قيد المراجعة
+                    {% elif request.status == 'approved' %}
+                      تم الاعتماد
+                    {% elif request.status == 'rejected' %}
+                      مرفوض
+                    {% elif request.status == 'delivered' %}
+                      قيد التوصيل
+                    {% endif %}
                   </span>
                   <br>
                   <small class="text-muted">{{ request.created_at|date:"d M Y" }}</small>
+
+                  {% if request.status == 'delivered' %}
+                    <p class="mt-2 text-success fw-bold">🚚 تم اعتماد طلبك، والمبلغ قيد التوصيل.</p>
+                  {% endif %}
                 </div>
 
                 <form action="{% url 'delete_aid_request' request.id %}" method="post" 

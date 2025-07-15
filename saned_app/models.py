@@ -118,3 +118,15 @@ class CampaignDonation(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name="campaign_donations")
     amount = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Notifications(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="notifications",null=True,blank=True)
+    role=models.CharField(max_length=25,null=True,blank=True)
+    message=models.TextField()
+    is_read=models.BooleanField(default=False)
+    created_at=models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        target=self.user.email if self.user else f"Role:{self.role}"
+        return f"Notification for {target}:{self.message[:50]}"

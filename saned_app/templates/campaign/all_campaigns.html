@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}كل الحملات{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="direction: rtl;">
+    <h2 class="mb-4 text-success text-center">📢 كل الحملات</h2>
+    <div class="row">
+        {% for campaign in campaigns %}
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm rounded-4 h-100">
+                <div class="card-body">
+                    <h5 class="card-title text-success">{{ campaign.title }}</h5>
+                    <p class="card-text"><strong>الوصف:</strong> {{ campaign.description|truncatewords:20 }}</p>
+                    <p class="card-text"><strong>الهدف:</strong> {{ campaign.goal_amount }} شيكل</p>
+                    <p class="card-text"><strong>الجهة:</strong> {{ campaign.ngo.organization_name }}</p>
+                    <p class="card-text"><strong>الموعد النهائي:</strong> {{ campaign.deadline }}</p>
+                    <a href="{% url 'donate_to_campaign' campaign.id %}" class="btn btn-success rounded-pill px-4">ساهم الآن</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">لا توجد حملات حالياً.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
