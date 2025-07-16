@@ -228,7 +228,8 @@ def ngo_dashboard(request):
     region_requests_count = AidRequest.objects.filter(
         beneficiary__region__in=regions,
         ngo__isnull=True,
-    ).exclude(status='rejected').count()
+        status='pending'  
+    ).count()
 
 
     total_donations = CampaignDonation.objects.filter(
