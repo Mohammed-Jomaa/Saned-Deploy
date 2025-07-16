@@ -5,9 +5,11 @@ from django.contrib import messages
 from django.utils import timezone
 import bcrypt, json
 from django.views.decorators.http import require_POST
-from django.db.models import Sum, F,Q
+from django.db.models import Sum, F,Q,Count
 from django.utils.timezone import now
-
+from django.utils.html import escape
+from django.db.models.functions import TruncMonth
+from django.db.models.functions import Concat
 
 
 def index(request):
@@ -45,17 +47,19 @@ def create_user(request):
             return JsonResponse({'success': False, 'errors': errors})
 
         hashed_pw = bcrypt.hashpw(data['registerPassword'].encode(), bcrypt.gensalt()).decode()
+        role = data.get('role', 'beneficiary')
+        region_value = data.get('registerRegion') if role != 'donor' else None
 
         user = User.objects.create(
             first_name=data['registerFirstName'],
             last_name=data['registerLastName'],
             email=data['registerEmail'],
-            region=data['registerRegion'],
+            region=region_value,
             password=hashed_pw,
-            role=data.get('role', 'beneficiary')
+            role=role
         )
 
-        if data.get('role') == 'ngo' and files.get('licenseDocument'):
+        if role == 'ngo' and files.get('licenseDocument'):
             NGOProfile.objects.create(
                 organization_name=f"{user.first_name} {user.last_name}",
                 license_document=files['licenseDocument'],
@@ -64,6 +68,7 @@ def create_user(request):
 
         request.session['user_id'] = user.id
         request.session['name'] = f"{user.first_name} {user.last_name}"
+
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False, 'errors': {'general': 'طلب غير صالح'}})
@@ -221,8 +226,10 @@ def ngo_dashboard(request):
 
     regions = [r.strip() for r in user.region.split(',') if r.strip()]
     region_requests_count = AidRequest.objects.filter(
-        beneficiary__region__in=regions
-    ).count()
+        beneficiary__region__in=regions,
+        ngo__isnull=True,
+    ).exclude(status='rejected').count()
+
 
     total_donations = CampaignDonation.objects.filter(
         campaign__ngo=ngo_profile
@@ -537,3 +544,76 @@ def all_campaigns(request):
 
 def about_us(request):
     return render(request, 'about_us.html')
+
+def export_donations_excel(request):
+    if 'user_id' not in request.session or request.session.get('role') != 'ngo':
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+    ngo = NGOProfile.objects.get(user=user)
+
+    donations = CampaignDonation.objects.filter(campaign__ngo=ngo).select_related('campaign', 'donor')
+
+    data = [{
+        'Campaign': d.campaign.title,
+        'Donor': f"{d.donor.first_name} {d.donor.last_name}",
+        'Amount': d.amount,
+        'Date': d.created_at.strftime('%Y-%m-%d')
+    } for d in donations]
+
+    df = pd.DataFrame(data)
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=donations.xlsx'
+    df.to_excel(response, index=False, engine='xlsxwriter')
+    return response
+
+def export_requests_excel(request):
+    if 'user_id' not in request.session or request.session.get('role') != 'ngo':
+        return redirect('login')
+
+    user = User.objects.get(id=request.session['user_id'])
+    ngo = NGOProfile.objects.get(user=user)
+    requests = AidRequest.objects.filter(ngo=ngo).select_related('beneficiary')
+
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=aid_requests.xls'
+
+    html = """
+    <html>
+    <head><meta charset="UTF-8"></head>
+    <body>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>المستفيد</th>
+                <th>النوع</th>
+                <th>الوصف</th>
+                <th>المبلغ المطلوب</th>
+                <th>الحالة</th>
+                <th>تاريخ الإنشاء</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for r in requests:
+        html += f"""
+            <tr>
+                <td>{escape(r.beneficiary.first_name)} {escape(r.beneficiary.last_name)}</td>
+                <td>{escape(r.type)}</td>
+                <td>{escape(r.description)}</td>
+                <td>{r.amount_requested}</td>
+                <td>{r.status}</td>
+                <td>{r.created_at.strftime('%Y-%m-%d')}</td>
+            </tr>
+        """
+
+    html += """
+        </tbody>
+    </table>
+    </body>
+    </html>
+    """
+
+    response.write(html)
+    return response

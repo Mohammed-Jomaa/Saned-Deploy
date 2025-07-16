@@ -1,7 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
   <meta charset="UTF-8" />
   <title>إنشاء حساب - ساند</title>
@@ -14,7 +13,6 @@
       background: linear-gradient(to bottom right, #ffffff, #A8D5C3);
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
     .register-wrapper {
       display: flex;
       align-items: center;
@@ -22,7 +20,6 @@
       min-height: 100vh;
       padding: 40px 8%;
     }
-
     .register-card {
       flex: 1;
       background-color: white;
@@ -31,54 +28,45 @@
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
       max-width: 500px;
     }
-
     .form-label {
       margin-bottom: 6px;
       font-weight: 500;
     }
-
     .input-group {
       border: 1px solid #ccc;
       border-radius: 10px;
       overflow: hidden;
       margin-bottom: 6px;
     }
-
     .input-group-text {
       background-color: #e9ecef;
       border: none;
       padding: 10px 14px;
     }
-
     .form-control {
       border: none;
       border-radius: 0;
       padding: 10px 14px;
       box-shadow: none;
     }
-
     .form-control:focus {
       outline: none;
       box-shadow: none;
     }
-
     .btn {
       border-radius: 10px;
       padding: 10px;
       font-size: 1.1rem;
     }
-
     .text-danger.small {
       font-size: 0.8rem;
       margin-bottom: 10px;
     }
-
     @media (max-width: 768px) {
       .register-wrapper {
         flex-direction: column;
         text-align: center;
       }
-
       .register-card {
         max-width: 100%;
         padding: 20px;
@@ -86,14 +74,11 @@
     }
   </style>
 </head>
-
 <body>
   <div class="register-wrapper">
     <div class="register-card">
       <h2 class="text-center mb-4"><i class="fas fa-user-plus me-2"></i>إنشاء حساب جديد</h2>
-
       <div id="register-success" class="alert alert-success text-center d-none"></div>
-
       <form id="register-form">
         {% csrf_token %}
         <div class="input-group">
@@ -114,7 +99,18 @@
         </div>
         <div class="text-danger small" id="error-registerEmail"></div>
 
-        <div class="input-group mb-2" id="single-region-group">
+        <div class="input-group">
+          <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+          <select name="role" id="role" class="form-control" onchange="toggleFieldsByRole()" required>
+            <option value="">اختر نوع الحساب</option>
+            <option value="beneficiary">محتاج</option>
+            <option value="donor">متبرع</option>
+            <option value="ngo">جمعية</option>
+          </select>
+        </div>
+        <div class="text-danger small" id="error-role"></div>
+
+        <div class="input-group mb-2" id="single-region-group" style="display: none;">
           <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
           <select name="registerRegion" id="single-region-select" class="form-control">
             <option value="" disabled selected>اختر المدينة</option>
@@ -134,17 +130,6 @@
           {% endfor %}
         </div>
         <div class="text-danger small" id="error-registerRegion"></div>
-
-        <div class="input-group">
-          <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
-          <select name="role" id="role" class="form-control" onchange="toggleNGODocument()" required>
-            <option value="">اختر نوع الحساب</option>
-            <option value="beneficiary">محتاج</option>
-            <option value="donor">متبرع</option>
-            <option value="ngo">جمعية</option>
-          </select>
-        </div>
-        <div class="text-danger small" id="error-role"></div>
 
         <div id="ngo-document-group" class="input-group mb-2" style="display: none;">
           <span class="input-group-text"><i class="fas fa-file-upload"></i></span>
@@ -173,13 +158,19 @@
   </div>
 
   <script>
-      function toggleNGODocument() {
-    const role = document.getElementById("role").value;
+    function toggleFieldsByRole() {
+      const role = document.getElementById("role").value;
+      document.getElementById("ngo-document-group").style.display = "none";
+      document.getElementById("single-region-group").style.display = "none";
+      document.getElementById("region-checkboxes").style.display = "none";
 
-    document.getElementById("ngo-document-group").style.display = role === "ngo" ? "flex" : "none";
-    document.getElementById("single-region-group").style.display = role === "ngo" ? "none" : "flex";
-    document.getElementById("region-checkboxes").style.display = role === "ngo" ? "block" : "none";
-  }
+      if (role === "ngo") {
+        document.getElementById("ngo-document-group").style.display = "flex";
+        document.getElementById("region-checkboxes").style.display = "block";
+      } else if (role === "beneficiary") {
+        document.getElementById("single-region-group").style.display = "flex";
+      }
+    }
 
     document.getElementById("register-form").onsubmit = async function (e) {
       e.preventDefault();
@@ -196,13 +187,15 @@
           return;
         }
         formData.append("registerRegion", selectedCities.join(","));
-      } else {
+      } else if (role === "beneficiary") {
         const selected = document.getElementById("single-region-select").value;
         if (!selected) {
           document.getElementById("error-registerRegion").innerHTML = "يرجى اختيار المدينة.";
           return;
         }
         formData.append("registerRegion", selected);
+      } else if (role === "donor") {
+        formData.append("registerRegion", "");
       }
 
       const response = await fetch("{% url 'create_user' %}", {

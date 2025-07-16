@@ -13,6 +13,7 @@ class UserManager(models.Manager):
         password = postdata.get('registerPassword', '')
         repeat_password = postdata.get('registerRepeatPassword', '')
         region = postdata.get('registerRegion', '').strip()
+        role = postdata.get('role', '').strip()
 
         if len(first_name) < 2 or not first_name.isalpha():
             errors['registerFirstName'] = "الاسم الأول يجب أن لا يقل عن حرفين ويحتوي فقط على أحرف"
@@ -31,10 +32,11 @@ class UserManager(models.Manager):
         if repeat_password != password:
             errors['registerRepeatPassword'] = "كلمتا المرور غير متطابقتين"
 
-        if not region:
-            errors['registerRegion'] = "يرجى إدخال المنطقة"
+        if role != 'donor' and not region:
+            errors['registerRegion'] = "يرجى اختيار المدينة"
 
         return errors
+
 
     def login_validator(self, postdata):
         errors = {}
@@ -55,7 +57,7 @@ class User(models.Model):
     last_name = models.CharField(max_length=255)
     email = models.EmailField(max_length=100, unique=True)
     password = models.CharField(max_length=255)
-    region = models.CharField(max_length=255)
+    region = models.CharField(max_length=100, null=True, blank=True)
     role = models.CharField(max_length=45, choices=[
         ('beneficiary', 'Beneficiary'),
         ('donor', 'Donor'),
@@ -120,13 +122,3 @@ class CampaignDonation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
-class Notifications(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE,related_name="notifications",null=True,blank=True)
-    role=models.CharField(max_length=25,null=True,blank=True)
-    message=models.TextField()
-    is_read=models.BooleanField(default=False)
-    created_at=models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        target=self.user.email if self.user else f"Role:{self.role}"
-        return f"Notification for {target}:{self.message[:50]}"

@@ -35,6 +35,7 @@ urlpatterns = [
     path('donor/donate_to_request/<int:request_id>/', views.donate_to_request, name='donate_to_request'),
 
     path('about/', views.about_us, name='about_us'),
-
+    path('ngo/export-donations-excel/', views.export_donations_excel, name='export_donations_excel'),
+    path('ngo/export-requests-excel/', views.export_requests_excel, name='export_requests_excel'),
 
 ]
