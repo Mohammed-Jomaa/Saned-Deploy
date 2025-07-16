@@ -10,7 +10,7 @@ from django.utils.timezone import now
 from django.utils.html import escape
 from django.db.models.functions import TruncMonth
 from django.db.models.functions import Concat
-
+import pandas as pd
 
 def index(request):
     return render(request, 'index.html')
