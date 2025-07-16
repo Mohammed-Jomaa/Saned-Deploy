@@ -423,13 +423,14 @@ def donor_dashboard(request):
         Q(total_donated__lt=F('goal_amount')) | Q(total_donated__isnull=True)
     ).order_by('-deadline')
 
-    aid_requests = AidRequest.objects.annotate(
+    aid_requests = AidRequest.objects.select_related('ngo').annotate(
         total_donated=Sum('donations__amount')
     ).filter(
         status='approved'
     ).filter(
         Q(total_donated__lt=F('amount_requested')) | Q(total_donated__isnull=True)
     ).order_by('-created_at')
+
 
     for campaign in campaigns:
         donated = campaign.total_donated or 0
