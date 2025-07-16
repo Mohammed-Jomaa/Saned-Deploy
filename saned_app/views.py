@@ -554,17 +554,43 @@ def export_donations_excel(request):
 
     donations = CampaignDonation.objects.filter(campaign__ngo=ngo).select_related('campaign', 'donor')
 
-    data = [{
-        'Campaign': d.campaign.title,
-        'Donor': f"{d.donor.first_name} {d.donor.last_name}",
-        'Amount': d.amount,
-        'Date': d.created_at.strftime('%Y-%m-%d')
-    } for d in donations]
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename=donations.xls'
 
-    df = pd.DataFrame(data)
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=donations.xlsx'
-    df.to_excel(response, index=False, engine='xlsxwriter')
+    html = """
+    <html>
+    <head><meta charset="UTF-8"></head>
+    <body>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>الحملة</th>
+                <th>المتبرع</th>
+                <th>المبلغ</th>
+                <th>التاريخ</th>
+            </tr>
+        </thead>
+        <tbody>
+    """
+
+    for d in donations:
+        html += f"""
+            <tr>
+                <td>{escape(d.campaign.title)}</td>
+                <td>{escape(d.donor.first_name)} {escape(d.donor.last_name)}</td>
+                <td>{d.amount}</td>
+                <td>{d.created_at.strftime('%Y-%m-%d')}</td>
+            </tr>
+        """
+
+    html += """
+        </tbody>
+    </table>
+    </body>
+    </html>
+    """
+
+    response.write(html)
     return response
 
 def export_requests_excel(request):
